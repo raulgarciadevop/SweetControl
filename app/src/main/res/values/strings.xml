@@ -23,4 +23,6 @@
     <string name="cantidad_test">100 MXN</string>
     <string name="resume_history">Historial de actividad:</string>
 
+    <string name="main_message">Balance del día:</string>
+
 </resources>

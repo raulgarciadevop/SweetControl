@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "978871854508",
+    "firebase_url": "https://sweetcontrol-lna2.firebaseio.com",
+    "project_id": "sweetcontrol-lna2",
+    "storage_bucket": "sweetcontrol-lna2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:978871854508:android:ba680d40e59d37755f8609",
+        "android_client_info": {
+          "package_name": "com.youngwaresoft.sweetcontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "978871854508-snoe8or4rujidok1ou2b4t7j4ra4hgu9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.youngwaresoft.sweetcontrol",
+            "certificate_hash": "fef0b72bd72238887621e95d806067a3bfbae6a1"
+          }
+        },
+        {
+          "client_id": "978871854508-pcag61j73t3srn9nio1ru9k0cu58bn03.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjV7LGBD3HTX5KDfL7eGH_WQBYJNGYl8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "978871854508-pcag61j73t3srn9nio1ru9k0cu58bn03.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,20 +1,41 @@
 package com.youngwaresoft.sweetcontrol;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.core.Constants;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -26,32 +47,51 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private TextView lblBalance;
+    private FirebaseAuth mAuth;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    final ArrayList<Producto> productos = new ArrayList<Producto>();
+
+
     String codigoobt="";
-    private RecyclerView listR;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    //private RecyclerView listR;
+    //private RecyclerView.Adapter mAdapter;
+    //private RecyclerView.LayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //productos
+        productos.add(new Producto("Dulce de leche",2.0,"Dulce sabor leche","001"));
+
+
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
+        lblBalance=findViewById(R.id.lblBalance);
+
+        mAuth = FirebaseAuth.getInstance();
+
+
 
         //Recycler View
-        listR = findViewById(R.id.listRes);
-        listR.setHasFixedSize(true);
+        //listR = findViewById(R.id.listRes);
+        //listR.setHasFixedSize(true);
 
-        layoutManager = new LinearLayoutManager(this);
-        listR.setLayoutManager(layoutManager);
+        //layoutManager = new LinearLayoutManager(this);
+        //listR.setLayoutManager(layoutManager);
 
         //mAdapter=new MyAdapter(myDataset);
-        listR.setAdapter(mAdapter);
+        //listR.setAdapter(mAdapter);
 
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -67,11 +107,104 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    public void descarga(){
+
+        /*
+        db.collection("productos")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Toast.makeText(MainActivity.this, ""+document.getId() + " => " + document.getData(), Toast.LENGTH_SHORT).show();
+                                //Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                            //Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+
+        DocumentReference docRef = db.collection("productos").document("BJ");
+        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                City city = documentSnapshot.toObject(City.class);
+            }
+        });
+        */
+
+
+
+        db.collection("productos")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                //Log.d(TAG, document.getId() + " => " + document.getData());
+                                productos.add(document.toObject(Producto.class));
+                                Toast.makeText(MainActivity.this, "Jalo", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, "Error getting documents "+task.getException(), Toast.LENGTH_LONG).show();
+
+                        }
+                    }
+                });
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        //FirebaseUser currentUser =  //mAuth.getCurrentUser();
+        //updateUI(currentUser);
+
+    }
+
+
+
+
+    /*
+    public void createAccount(){
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "createUserWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            updateUI(user);
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                            Toast.makeText(EmailPasswordActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            updateUI(null);
+                        }
+
+                        // ...
+                    }
+                });
+    }
+    */
+
+    private void updateUI(FirebaseUser currentUser) {
+
     }
 
     public void onScannear(){
@@ -97,12 +230,23 @@ public class MainActivity extends AppCompatActivity
             if(result.getContents()==null){
                 Toast.makeText(this,"Cancelado",Toast.LENGTH_SHORT).show();
             }else {
-                codigoobt=result.getContents().toString();
-                Toast.makeText(this,"Codigo: "+codigoobt,Toast.LENGTH_LONG).show();
+                codigoobt=result.getContents().toString(); //Aqui esta el codigo =============================================================
+                //Toast.makeText(this,"Codigo: "+codigoobt,Toast.LENGTH_LONG).show();
+
+                Toast.makeText(this,"Precio: "+productos.get(0).getPrecio(),Toast.LENGTH_LONG).show();
             }
         }else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+
+    public String buscarProducto(final String codigoprod){
+        for(int i=0;i<productos.size();i++)
+            if(productos.get(i).getCodigo().equals(codigoprod))
+                return productos.get(i).getNombre();
+
+        return null;
     }
 
     @Override
@@ -131,6 +275,9 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            Toast.makeText(this, "Code: "+productos.get(0).getCodigo(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "/nName:"+productos.get(0).getNombre(), Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -145,7 +292,10 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+            descarga();
+        }
+
+        /*else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -156,6 +306,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
+        */
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
