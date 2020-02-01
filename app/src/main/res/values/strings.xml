@@ -22,7 +22,13 @@
     <string name="resume_title">Hoy has vendido</string>
     <string name="cantidad_test">100 MXN</string>
     <string name="resume_history">Historial de actividad:</string>
-
     <string name="main_message">Balance del día:</string>
+
+    <!-- Agregar producto !-->
+    <string name="title_activity_agregar_producto">Agregar producto</string>
+    <string name="lbl_nombre">Nombre del producto</string>
+    <string name="lbl_descripcion">Descripcion</string>
+    <string name="lbl_precio">Precio</string>
+    <string name="btn_agregar_prod">Agregar</string>
 
 </resources>
