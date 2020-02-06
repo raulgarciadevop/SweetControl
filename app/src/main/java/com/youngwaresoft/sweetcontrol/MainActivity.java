@@ -1,38 +1,23 @@
 package com.youngwaresoft.sweetcontrol;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
-import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
 import android.view.MenuItem;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.core.Constants;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -43,9 +28,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.Menu;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,9 +39,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseAuth mAuth;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     final ArrayList<Producto> productos = new ArrayList<Producto>();
+    Intent i;
 
 
-    String codigoobt="";
+    String codigoobt = "";
     //private RecyclerView listR;
     //private RecyclerView.Adapter mAdapter;
     //private RecyclerView.LayoutManager layoutManager;
@@ -70,17 +53,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         //productos
-        productos.add(new Producto("Dulce de leche",2.0,"Dulce sabor leche","001"));
-
+        productos.add(new Producto("Dulce de leche", 2.0, "Dulce sabor leche", "001"));
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
-        lblBalance=findViewById(R.id.lblBalance);
+        lblBalance = findViewById(R.id.lblBalance);
 
         mAuth = FirebaseAuth.getInstance();
 
+        i = new Intent(this, AgregarProducto.class);
 
 
         //Recycler View
@@ -115,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    public void descarga(){
+    public void descarga() {
 
         /*
         db.collection("productos")
@@ -145,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         */
 
 
-
         db.collection("productos")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -158,13 +140,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 Toast.makeText(MainActivity.this, "Jalo", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            Toast.makeText(MainActivity.this, "Error getting documents "+task.getException(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(MainActivity.this, "Error getting documents " + task.getException(), Toast.LENGTH_LONG).show();
 
                         }
                     }
                 });
     }
 
+
+    /*
 
     @Override
     public void onStart() {
@@ -175,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+*/
 
 
 
@@ -201,13 +186,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 });
     }
-    */
+
 
     private void updateUI(FirebaseUser currentUser) {
 
-    }
+    }*/
 
-    public void onScannear(){
+    public void onScannear() {
         IntentIntegrator intent = new IntentIntegrator(this);
         intent.setDesiredBarcodeFormats(IntentIntegrator.PRODUCT_CODE_TYPES);
 
@@ -224,30 +209,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         //super.onActivityResult(requestCode, resultCode, data);
 
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode,resultCode,data);
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        if(result!=null){
-            if(result.getContents()==null){
-                Toast.makeText(this,"Cancelado",Toast.LENGTH_SHORT).show();
-            }else {
-                codigoobt=result.getContents().toString(); //Aqui esta el codigo =============================================================
+        if (result != null) {
+            if (result.getContents() == null) {
+                Toast.makeText(this, "Cancelado", Toast.LENGTH_SHORT).show();
+            } else {
+                codigoobt = result.getContents().toString(); //Aqui esta el codigo =============================================================
                 //Toast.makeText(this,"Codigo: "+codigoobt,Toast.LENGTH_LONG).show();
 
-                Toast.makeText(this,"Precio: "+productos.get(0).getPrecio(),Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Precio: " + productos.get(0).getPrecio(), Toast.LENGTH_LONG).show();
             }
-        }else {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
 
+    /*
     public String buscarProducto(final String codigoprod){
         for(int i=0;i<productos.size();i++)
             if(productos.get(i).getCodigo().equals(codigoprod))
                 return productos.get(i).getNombre();
 
         return null;
-    }
+    }*/
 
     @Override
     public void onBackPressed() {
@@ -295,9 +281,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             descarga();
         }
 
-        /*else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
+        else if (id == R.id.nav_gallery) {
+            startActivity(i);
+        }/* else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_tools) {
 

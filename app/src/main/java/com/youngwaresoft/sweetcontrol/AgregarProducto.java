@@ -3,12 +3,16 @@ package com.youngwaresoft.sweetcontrol;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -19,18 +23,19 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AgregarProducto extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Map<String, Object> producto = new HashMap<>();
+    final ArrayList<Producto> productos = new ArrayList<Producto>();
     Button btnAdd;
     EditText txtNombre, txtDesc, txtPrecio, txtCodigo;
     String cbarras;
@@ -50,6 +55,8 @@ public class AgregarProducto extends AppCompatActivity {
         txtCodigo=findViewById(R.id.txtCodigoProd);
         cbarras="";
 
+        descarga();
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -68,8 +75,9 @@ public class AgregarProducto extends AppCompatActivity {
                 if(isAllFull())
                     registrarProd();
                 else
-                    Snackbar.make(v, "Debes llenar todos los campos", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    Toast.makeText(AgregarProducto.this, "Debes llenar todos los campos requeridos", Toast.LENGTH_SHORT).show();
+
+
 
             }
         });
@@ -78,18 +86,38 @@ public class AgregarProducto extends AppCompatActivity {
     }
 
     private boolean isAllFull(){
-        if (txtNombre.getText().equals("") || txtCodigo.getText().equals("") || txtPrecio.getText().equals(""))
+        if (txtNombre.getText().toString().isEmpty())
+            return false;
+        if (txtCodigo.getText().toString().isEmpty())
+            return false;
+        if (txtPrecio.getText().toString().isEmpty())
             return false;
 
+
         return true;
+    }
+
+    private void cleanF(){
+        txtNombre.setText("");
+        txtCodigo.setText("");
+        txtDesc.setText("");
+        txtPrecio.setText("");
     }
 
     private void registrarProd(){
 
         //onScannear();
-        Producto prod = new Producto(txtNombre.getText().toString(),Double.parseDouble(txtPrecio.getText().toString()),
-                txtDesc.getText().toString(),cbarras);
-        subirFB(prod);
+        if(isUnique(txtCodigo.getText().toString())){
+            Producto prod = new Producto(txtNombre.getText().toString(),Double.parseDouble(txtPrecio.getText().toString()),
+                    txtDesc.getText().toString(),txtCodigo.getText().toString());
+            subirFB(prod);
+        }else {
+            cleanF();
+            Toast.makeText(this, "Error: el producto ya ha sido registrado.", Toast.LENGTH_SHORT).show();
+        }
+
+
+
 
 
     }
@@ -100,8 +128,9 @@ public class AgregarProducto extends AppCompatActivity {
         producto.put("descripcion",p.getDesc());
         producto.put("precio",p.getPrecio());
 
+
         // Add a new document with a generated ID
-        db.collection("users")
+        db.collection("productos")
                 .add(producto)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -143,6 +172,7 @@ public class AgregarProducto extends AppCompatActivity {
                 Toast.makeText(this,"Cancelado",Toast.LENGTH_SHORT).show();
             }else {
                 cbarras=result.getContents().toString(); //Aqui esta el codigo =============================================================
+                txtCodigo.setText(cbarras);
                 //Toast.makeText(this,"Codigo: "+codigoobt,Toast.LENGTH_LONG).show();
 
             }
@@ -159,6 +189,35 @@ public class AgregarProducto extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    public void descarga() {
+
+        db.collection("productos")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                //Log.d(TAG, document.getId() + " => " + document.getData());
+                                productos.add(document.toObject(Producto.class));
+                                Toast.makeText(getApplicationContext(), "Carga completa", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Error conectandose al servidor. EC:" + task.getException(), Toast.LENGTH_LONG).show();
+
+                        }
+                    }
+                });
+    }
+
+    private boolean isUnique(String c){
+        for (int i=0;i<productos.size();i++){
+            if (productos.get(i).getCodigo().equals(c))
+                return false;
+        }
+        return true;
     }
 
 }
